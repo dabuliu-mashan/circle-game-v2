@@ -9,7 +9,6 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "your-secret-key-here")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=31)
 
-# 使用内存变量存储数据
 users_data = {}
 scores_data = []
 
@@ -47,12 +46,10 @@ def register():
     data = request.get_json()
     username = data.get("username", generate_username())
     
-    # 检查用户名是否存在
     for user in users_data.values():
         if user.username == username:
             return jsonify({"success": False, "message": "用户名已存在"})
     
-    # 创建新用户
     user_id = str(len(users_data) + 1)
     user = User(user_id, username)
     users_data[user_id] = user
@@ -70,13 +67,11 @@ def submit_score():
     data = request.get_json()
     score = float(data.get("score", 0))
     
-    # 记录分数
     scores_data.append({
         "user_id": current_user.get_id(),
         "score": score
     })
     
-    # 更新最高分
     if score > current_user.best_score:
         current_user.best_score = score
     
@@ -85,7 +80,6 @@ def submit_score():
 @app.route("/leaderboard")
 @login_required
 def leaderboard():
-    # 获取所有用户并按最高分排序
     users_list = sorted(
         users_data.values(),
         key=lambda x: x.best_score,
@@ -99,5 +93,4 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-if __name__ == "__main__":
-    app.run(debug=True)
+handler = app
